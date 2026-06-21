@@ -121,12 +121,25 @@ export default function Sobre() {
             {/* Card 1 */}
             <div className="bg-surface-container-lowest p-8 rounded-xl shadow-bloom flex flex-col gap-6 transition-all duration-300 hover:-translate-y-2 group">
               <div className="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center text-secondary group-hover:scale-110 transition-transform">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#8B4457" fillRule="evenodd">
-                  {/* Flower center cutout */}
-                  <path d="M 12 4.5 C 13 4.5, 14 5.5, 14 6.5 C 15.2 5.8, 16.5 6.5, 16.5 7.7 C 17.5 7.7, 18.2 8.8, 17.8 9.8 C 18.2 10.8, 17.5 12, 16.5 12 C 16.5 13.2, 15.2 13.8, 14 13.2 C 14 14.2, 13 15.2, 12 15.2 C 11 15.2, 10 14.2, 10 13.2 C 8.8 13.8, 7.5 13.2, 7.5 12 C 6.5 12, 5.8 10.8, 6.2 9.8 C 5.8 8.8, 6.5 7.7, 7.5 7.7 C 7.5 6.5, 8.8 5.8, 10 6.5 C 10 5.5, 11 4.5, 12 4.5 Z M 12 7.2 A 1.8 1.8 0 1 0 12 10.8 A 1.8 1.8 0 1 0 12 7.2 Z" />
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#8B4457">
+                  <defs>
+                    <mask id="card1-flower-mask">
+                      <rect x="0" y="0" width="24" height="24" fill="white" />
+                      <circle cx="12" cy="8.5" r="1.6" fill="black" />
+                    </mask>
+                  </defs>
+                  {/* 6 petals */}
+                  <g mask="url(#card1-flower-mask)">
+                    <circle cx="12" cy="5.9" r="3.0" />
+                    <circle cx="14.25" cy="7.2" r="3.0" />
+                    <circle cx="14.25" cy="9.8" r="3.0" />
+                    <circle cx="12" cy="11.1" r="3.0" />
+                    <circle cx="9.75" cy="9.8" r="3.0" />
+                    <circle cx="9.75" cy="7.2" r="3.0" />
+                  </g>
                   {/* Leaves */}
-                  <path d="M 12 20.5 C 9.5 20 7.5 18, 7.5 15.5 C 7.5 13, 10 12, 11.5 12.5 C 11.8 14.5 12 17.5 12 20.5 Z" />
-                  <path d="M 12 20.5 C 14.5 20 16.5 18, 16.5 15.5 C 16.5 13, 14 12, 12.5 12.5 C 12.2 14.5 12 17.5 12 20.5 Z" />
+                  <path d="M 11 19 C 11 20 9.5 20.5 8.5 19.5 C 7 18 6.5 16 8 13.5 C 9.5 14.5 11 17 11 19 Z" />
+                  <path d="M 13 19 C 13 20 14.5 20.5 15.5 19.5 C 17 18 17.5 16 16 13.5 C 14.5 14.5 13 17 13 19 Z" />
                 </svg>
               </div>
               <div>
@@ -154,8 +167,8 @@ export default function Sobre() {
             <div className="bg-surface-container-lowest p-8 rounded-xl shadow-bloom flex flex-col gap-6 transition-all duration-300 hover:-translate-y-2 group">
               <div className="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center text-secondary group-hover:scale-110 transition-transform">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#8B4457">
-                  <path d="M12 2l1.9 2.2 2.9-.3.9 2.8 2.7 1.1-.3 2.9 1.9 2.2-1.4 2.6.9 2.8-2.3 1.8-.9 2.8-2.8-.7-1.9 2.2-1.9-2.2-2.8.7-.9-2.8-2.3-1.8.9-2.8-1.4-2.6 1.9-2.2-.3-2.9 2.7-1.1.9-2.8 2.9.3L12 2z" />
-                  <path d="M 9.5 12.5 L 11.5 14.5 L 15.5 10" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M 12 2.5 L 14.07 4.27 L 16.75 3.77 L 17.66 6.34 L 20.23 7.25 L 19.73 9.93 L 21.5 12 L 19.73 14.07 L 20.23 16.75 L 17.66 17.66 L 16.75 20.23 L 14.07 19.73 L 12 21.5 L 9.93 19.73 L 7.25 20.23 L 6.34 17.66 L 3.77 16.75 L 4.27 14.07 L 2.5 12 L 4.27 9.93 L 3.77 7.25 L 6.34 6.34 L 7.25 3.77 L 9.93 4.27 Z" />
+                  <path d="M 9.5 12.5 L 11.5 14.5 L 15.5 10" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </div>
               <div>

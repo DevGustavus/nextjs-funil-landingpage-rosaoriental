@@ -1,126 +1,170 @@
 "use client";
-import { useState } from "react";
+
+import { useQuiz } from "@/context/QuizContext";
+import { quizQuestions } from "@/data/quizQuestions";
+import { treatments } from "@/data/treatments";
+import TreatmentCard from "@/components/TreatmentCard";
 
 export default function QuizPage() {
-  const [step, setStep] = useState<"quiz" | "result">("quiz");
+  const {
+    step,
+    setStep,
+    currentQuestionIndex,
+    setCurrentQuestionIndex,
+    answers,
+    setAnswers,
+    resetQuiz,
+  } = useQuiz();
+
+  const currentQuestion = quizQuestions[currentQuestionIndex];
+  const progressPercentage =
+    ((currentQuestionIndex + 1) / quizQuestions.length) * 100;
+  const isLastQuestion = currentQuestionIndex === quizQuestions.length - 1;
+  const currentAnswer = answers[currentQuestion.id];
+
+  const handleSelectOption = (optionId: string) => {
+    setAnswers({
+      ...answers,
+      [currentQuestion.id]: optionId,
+    });
+  };
+
+  const handleNext = () => {
+    if (!currentAnswer) return; // Prevent proceeding without an answer
+    if (!isLastQuestion) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
+    } else {
+      console.log("Respostas completas:", answers);
+      setStep("result");
+    }
+  };
+
+  const selectedAnswers = quizQuestions.reduce((acc, question) => {
+    const selectedOptionId = answers[question.id];
+    const option = question.options.find((opt) => opt.id === selectedOptionId);
+    acc[question.id] = option ? option.text : "";
+    return acc;
+  }, {} as Record<string, string>);
 
   if (step === "result") {
+    // Definindo 3 opções padrão para exibir no resultado:
+    const recommendedIds = ["rosa-1m", "rosa-5l6", "rosa-12m-creme"];
+    const recommendedTreatments = treatments.filter((t) =>
+      recommendedIds.includes(t.id)
+    );
+    recommendedTreatments.sort((a, b) => a.price - b.price);
+
+    // Determine recommended category based on investment
+    const investmentAns = answers.investment; // e.g., "A", "B", "C"...
+    let recommendedCategoryValue = "Tratamento Inicial";
+    if (investmentAns === "A" || investmentAns === "B") {
+      recommendedCategoryValue = "Tratamento Inicial";
+    } else if (investmentAns === "C") {
+      recommendedCategoryValue = "Tratamento Longo";
+    } else if (investmentAns === "D" || investmentAns === "E") {
+      recommendedCategoryValue = "Tratamento Premium";
+    }
+
+    const baseCategories = [
+      { title: "Tratamento Inicial (Orçamento Baixo)", value: "Tratamento Inicial" },
+      { title: "Tratamento Longo (Orçamento Médio)", value: "Tratamento Longo" },
+      { title: "Tratamento Premium (Orçamento Alto)", value: "Tratamento Premium" }
+    ];
+
+    const orderedCategories = [];
+    const recCatObj = baseCategories.find(c => c.value === recommendedCategoryValue);
+    if (recCatObj) {
+      orderedCategories.push({ title: `Recomendado para você: ${recCatObj.title.split(" (")[0]}`, value: recCatObj.value });
+    }
+    orderedCategories.push({ title: "Promoções Imperdíveis", value: "Promoção" });
+
+    baseCategories.forEach(c => {
+      if (c.value !== recommendedCategoryValue) {
+        orderedCategories.push(c);
+      }
+    });
+
     return (
-      <section className="flex-grow w-full max-w-container-max mx-auto px-margin-mobile md:px-gutter py-section-padding-mobile md:py-section-padding-desktop flex flex-col items-center">
+      <section className="flex-grow w-full max-w-container-max mx-auto px-margin-mobile md:px-gutter py-section-padding-mobile md:py-section-padding-desktop flex flex-col items-center pb-24">
         {/* Header Section */}
-        <div className="text-center max-w-3xl mb-12 md:mb-16">
+        <div className="text-center max-w-3xl mb-12 md:mb-16 space-y-4">
           <h1 className="font-display-lg-mobile md:font-display-lg text-display-lg-mobile md:text-display-lg text-wine-accent mb-stack-md">
             Seu Diagnóstico Personalizado
           </h1>
           <p className="font-body-lg text-body-lg text-on-surface-variant">
-            Com base nas suas respostas, notamos que sua pele anseia por nutrição profunda e rejuvenescimento estrutural. Preparamos rituais exclusivos para restaurar sua luminosidade natural e firmeza, respeitando a delicadeza que sua fase exige.
+            Analisamos suas respostas e preparamos um plano ideal para você que está na faixa de{" "}
+            <span className="font-bold text-[#C97A8F]">{selectedAnswers.age || "sua faixa de idade"}</span>. Identificamos que o ponto que mais incomoda na sua pele hoje é:{" "}
+            <span className="font-bold text-[#C97A8F]">{selectedAnswers.concern || "sinais de envelhecimento"}</span>.
           </p>
+          <p className="font-body-lg text-body-lg text-on-surface-variant">
+            Sobre seu histórico com outros produtos ou procedimentos:{" "}
+            <span className="font-bold text-[#C97A8F]">{selectedAnswers.history || "outros cuidados"}</span>. Por isso, compreendemos o seu desejo de focar em{" "}
+            <span className="font-bold text-[#C97A8F]">{selectedAnswers.goal || "melhorar a pele"}</span> como sua prioridade número um.
+          </p>
+          <p className="font-body-lg text-body-lg text-on-surface-variant">
+            Sobre a facilidade em seguir uma rotina em cápsulas:{" "}
+            <span className="font-bold text-[#C97A8F]">{selectedAnswers.routine || "seguir o tratamento"}</span>. O Rosa Oriental é ideal para cuidar da sua beleza de dentro para fora com máxima praticidade.
+          </p>
+          <p className="font-body-lg text-body-lg text-on-surface-variant font-medium">
+            Considerando a faixa de investimento escolhida de{" "}
+            <span className="font-bold text-[#C97A8F]">{selectedAnswers.investment || "investimento planejado"}</span>, estruturamos as melhores recomendações abaixo para que você inicie sua transformação!
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-6">
+            <button
+              onClick={resetQuiz}
+              className="w-full sm:w-auto bg-transparent border-2 border-[#C97A8F] text-[#C97A8F] font-label-bold text-label-bold py-3 px-8 rounded-lg hover:bg-[#C97A8F] hover:text-white transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/>
+              </svg>
+              Refazer Quiz
+            </button>
+            <button
+              className="w-full sm:w-auto bg-[#8B4457] text-white font-label-bold text-label-bold py-3 px-8 rounded-lg hover:bg-opacity-95 hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+            >
+              <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path d="M21 6h-2v9H6v2c0 .55.45 1 1 1h11l4 4V7c0-.55-.45-1-1-1zm-4 6V3c0-.55-.45-1-1-1H3c-.55 0-1 .45-1 1v14l4-4h10c.55 0 1-.45 1-1z"/>
+              </svg>
+              Falar com Especialista
+            </button>
+          </div>
         </div>
-        {/* Offers Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full">
-          {/* Card 1: Low Ticket */}
-          <div className="bg-surface rounded-2xl p-6 shadow-bloom flex flex-col relative transition-transform duration-300 hover:-translate-y-1 cursor-pointer">
-            <div className="h-48 w-full rounded-xl bg-surface-container-high mb-6 overflow-hidden">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                alt="Tratamento Inicial"
-                className="w-full h-full object-cover"
-                src="https://placehold.co/400x300/F5E6E0/8B4457?text=Tratamento+Inicial"
-              />
-            </div>
-            <h3 className="font-title-sm text-title-sm text-wine-accent mb-2">Tratamento Inicial</h3>
-            <p className="font-body-md text-body-md text-on-surface-variant flex-grow mb-6">Para os primeiros passos no cuidado intenso.</p>
-            <div className="mb-6 border-t border-primary-container pt-4">
-              <ul className="space-y-3 font-body-md text-body-md text-text-gray">
-                <li className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-secondary text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-                  Sérum Facial Rejuvenescedor
-                </li>
-              </ul>
-            </div>
-            <div className="mt-auto">
-              <div className="font-headline-md-mobile text-headline-md-mobile text-wine-accent mb-4">R$ 110<span className="text-sm font-normal text-on-surface-variant"> /único</span></div>
-              <button className="w-full bg-[#C97A8F] text-white font-label-bold text-label-bold py-4 rounded-lg hover:bg-pastel-hover hover:text-wine-accent transition-colors duration-300 shadow-sm cursor-pointer">Comprar Agora</button>
-            </div>
-          </div>
-          {/* Card 2: Best Value (Highlighted) */}
-          <div className="bg-surface rounded-2xl p-6 shadow-bloom flex flex-col relative transition-transform duration-300 hover:-translate-y-1 border-2 border-[#C97A8F] scale-100 md:scale-105 z-10 cursor-pointer">
-            <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-[#C97A8F] text-white font-label-bold text-label-bold py-1 px-4 rounded-full shadow-md">
-              Mais Popular
-            </div>
-            <div className="h-48 w-full rounded-xl bg-surface-container-high mb-6 overflow-hidden mt-2">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                alt="Ritual de Equilíbrio"
-                className="w-full h-full object-cover"
-                src="https://placehold.co/400x300/F5E6E0/8B4457?text=Ritual+de+Equilibrio"
-              />
-            </div>
-            <h3 className="font-title-sm text-title-sm text-wine-accent mb-2">Ritual de Equilíbrio</h3>
-            <p className="font-body-md text-body-md text-on-surface-variant flex-grow mb-6">A combinação perfeita para nutrição e hidratação profunda.</p>
-            <div className="mb-6 border-t border-primary-container pt-4">
-              <ul className="space-y-3 font-body-md text-body-md text-text-gray">
-                <li className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-secondary text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-                  Sérum Facial Rejuvenescedor
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-secondary text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-                  Creme Nutritivo Rosa Oriental
-                </li>
-              </ul>
-            </div>
-            <div className="mt-auto">
-              <div className="font-headline-md-mobile text-headline-md-mobile text-wine-accent mb-4">R$ 280<span className="text-sm font-normal text-on-surface-variant line-through ml-2">R$ 320</span></div>
-              <button className="w-full bg-[#C97A8F] text-white font-label-bold text-label-bold py-4 rounded-lg hover:bg-pastel-hover hover:text-wine-accent transition-colors duration-300 shadow-sm cursor-pointer">Comprar Agora</button>
-            </div>
-          </div>
-          {/* Card 3: Long Term/Intensive */}
-          <div className="bg-surface rounded-2xl p-6 shadow-bloom flex flex-col relative transition-transform duration-300 hover:-translate-y-1 cursor-pointer">
-            <div className="absolute -top-3 right-4 bg-secondary text-white text-xs font-bold py-1 px-2 rounded-lg shadow-sm">
-              -30% OFF
-            </div>
-            <div className="h-48 w-full rounded-xl bg-surface-container-high mb-6 overflow-hidden">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                alt="Transformação Completa"
-                className="w-full h-full object-cover"
-                src="https://placehold.co/400x300/F5E6E0/8B4457?text=Transformacao+Completa"
-              />
-            </div>
-            <h3 className="font-title-sm text-title-sm text-wine-accent mb-2">Transformação Completa</h3>
-            <p className="font-body-md text-body-md text-on-surface-variant flex-grow mb-6">O ritual definitivo para renovação celular e descanso da pele.</p>
-            <div className="mb-6 border-t border-primary-container pt-4">
-              <ul className="space-y-3 font-body-md text-body-md text-text-gray">
-                <li className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-secondary text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-                  Sérum Facial Rejuvenescedor
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-secondary text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-                  Creme Nutritivo Rosa Oriental
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-secondary text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-                  Loção Detox Purificante
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-secondary text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-                  Tratamento Noturno Rosa Sono
-                </li>
-              </ul>
-            </div>
-            <div className="mt-auto">
-              <div className="font-headline-md-mobile text-headline-md-mobile text-wine-accent mb-4">R$ 450<span className="text-sm font-normal text-on-surface-variant line-through ml-2">R$ 642</span></div>
-              <button className="w-full bg-[#C97A8F] text-white font-label-bold text-label-bold py-4 rounded-lg hover:bg-pastel-hover hover:text-wine-accent transition-colors duration-300 shadow-sm cursor-pointer">Comprar Agora</button>
-            </div>
-          </div>
+        {/* Offers Grid grouped by Category */}
+        <div className="w-full space-y-16">
+          {orderedCategories.map((category) => {
+            const categoryTreatments = treatments.filter(
+              (t) => t.budgetCategory === category.value
+            );
+            if (categoryTreatments.length === 0) return null;
+
+            return (
+              <div key={category.value} className="w-full">
+                <h2 className="text-2xl md:text-3xl font-serif text-wine-accent mb-6 border-b-2 border-primary-container pb-3 text-left font-semibold flex items-center gap-3">
+                  {category.title}
+                  {category.value === "Promoção" && (
+                    <svg className="w-7 h-7 text-[#C97A8F] animate-pulse" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 2C12 2 11 5 8 8C4.5 11.5 4.5 16 4.5 16C4.5 20.14 7.86 23.5 12 23.5C16.14 23.5 19.5 20.14 19.5 16C19.5 16 19.5 11.5 16 8C13 5 12 2 12 2ZM12 21.5C9.52 21.5 7.5 19.48 7.5 17C7.5 15.65 8.08 14.43 9 13.58C9 13.58 9 16 11 18L12 18L13 18C15 16 15 13.58 15 13.58C15.92 14.43 16.5 15.65 16.5 17C16.5 19.48 14.48 21.5 12 21.5Z" />
+                    </svg>
+                  )}
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full items-stretch">
+                  {categoryTreatments.map((treatment) => (
+                    <TreatmentCard key={treatment.id} treatment={treatment} />
+                  ))}
+                </div>
+              </div>
+            );
+          })}
         </div>
         {/* Secondary CTA */}
         <div className="mt-16 text-center">
-          <p className="font-body-md text-body-md text-on-surface-variant mb-4">Ainda tem dúvidas sobre qual é o melhor ritual para você?</p>
+          <p className="font-body-md text-body-md text-on-surface-variant mb-4">
+            Ainda tem dúvidas sobre qual é o melhor ritual para você?
+          </p>
           <button className="bg-transparent border border-[#8B4457] text-[#8B4457] font-label-bold text-label-bold py-3 px-8 rounded-lg hover:bg-pastel-hover transition-colors duration-300 flex items-center gap-2 mx-auto cursor-pointer">
-            <span className="material-symbols-outlined">forum</span>
+            <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <path d="M21 6h-2v9H6v2c0 .55.45 1 1 1h11l4 4V7c0-.55-.45-1-1-1zm-4 6V3c0-.55-.45-1-1-1H3c-.55 0-1 .45-1 1v14l4-4h10c.55 0 1-.45 1-1z"/>
+            </svg>
             Falar com Especialista
           </button>
         </div>
@@ -130,74 +174,136 @@ export default function QuizPage() {
 
   return (
     <>
-      <section className="w-full bg-primary-container py-section-padding-mobile md:py-section-padding-desktop text-center">
+      <section className="w-full bg-primary-container py-section-padding-mobile md:py-section-padding-desktop text-center transition-opacity duration-300">
         <div className="max-w-container-max mx-auto px-margin-mobile md:px-gutter">
           <h1 className="font-headline-md-mobile text-headline-md-mobile md:font-headline-md md:text-headline-md text-wine-accent mb-stack-sm">
-            Inicie seu Diagnóstico Personalizado
+            Descubra o cuidado ideal para sua pele
           </h1>
           <p className="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mx-auto">
-            Descubra a rotina de cuidados ideal para a sua pele em poucos passos.
+            Responda este quiz rápido para sabermos mais sobre você e suas necessidades.
           </p>
         </div>
       </section>
 
       {/* Quiz Interface Section */}
-      <section className="w-full py-section-padding-mobile md:py-section-padding-desktop bg-surface-container-lowest">
-        <div className="max-w-3xl mx-auto px-margin-mobile md:px-gutter">
+      <section className="w-full py-section-padding-mobile md:py-section-padding-desktop bg-surface-container-lowest min-h-[60vh] flex flex-col">
+        <div className="max-w-3xl w-full mx-auto px-margin-mobile md:px-gutter">
           {/* Progress Bar */}
           <div className="mb-stack-lg">
-            <div className="w-full bg-primary-container h-1 rounded-full overflow-hidden">
-              <div className="bg-wine-accent h-full transition-all duration-500 ease-in-out" style={{ width: "100%" }}></div>
+            <div className="w-full bg-primary-container h-2 rounded-full overflow-hidden">
+              <div
+                className="bg-wine-accent h-full transition-all duration-500 ease-in-out"
+                style={{ width: `${progressPercentage}%` }}
+              ></div>
             </div>
             <div className="text-right mt-2 text-outline font-label-sm text-label-sm uppercase tracking-wider">
-              Passo Único
+              Passo {currentQuestionIndex + 1} de {quizQuestions.length}
             </div>
           </div>
           {/* Quiz Card */}
-          <div className="bg-surface rounded-[16px] shadow-bloom p-6 md:p-12 border border-surface-variant relative overflow-hidden">
-            <h2 className="font-title-sm text-title-sm text-center text-wine-accent mb-stack-lg">
-              Qual sua idade?
+          <div className="bg-surface rounded-[16px] shadow-bloom p-6 md:p-12 border border-surface-variant relative overflow-hidden flex flex-col transition-all duration-300">
+            <h2 className="font-title-sm text-title-sm md:text-title-md text-center text-wine-accent mb-stack-lg">
+              {currentQuestion.title}
             </h2>
             {/* Options Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-stack-md mb-stack-lg">
-              <label className="cursor-pointer group">
-                <input className="peer sr-only" name="age" type="radio" value="18-25" />
-                <div className="p-6 bg-surface border-2 border-primary-container rounded-lg text-center transition-all duration-300 ease-out group-hover:border-[#C97A8F] peer-checked:border-[#C97A8F] peer-checked:bg-surface-bright hover-lift flex flex-col items-center gap-2">
-                  <span className="font-body-lg text-body-lg text-on-surface peer-checked:text-wine-accent font-medium">18-25</span>
-                  <span className="font-label-sm text-label-sm text-outline uppercase">Anos</span>
-                </div>
-              </label>
-              <label className="cursor-pointer group">
-                <input className="peer sr-only" name="age" type="radio" value="26-35" defaultChecked />
-                <div className="p-6 bg-surface border-2 border-[#C97A8F] rounded-lg text-center transition-all duration-300 ease-out bg-surface-bright shadow-bloom flex flex-col items-center gap-2 relative">
-                  <span className="material-symbols-outlined absolute top-3 right-3 text-[#C97A8F]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-                  <span className="font-body-lg text-body-lg text-wine-accent font-medium">26-35</span>
-                  <span className="font-label-sm text-label-sm text-outline uppercase">Anos</span>
-                </div>
-              </label>
-              <label className="cursor-pointer group">
-                <input className="peer sr-only" name="age" type="radio" value="36-45" />
-                <div className="p-6 bg-surface border-2 border-primary-container rounded-lg text-center transition-all duration-300 ease-out group-hover:border-[#C97A8F] peer-checked:border-[#C97A8F] peer-checked:bg-surface-bright hover-lift flex flex-col items-center gap-2">
-                  <span className="font-body-lg text-body-lg text-on-surface peer-checked:text-wine-accent font-medium">36-45</span>
-                  <span className="font-label-sm text-label-sm text-outline uppercase">Anos</span>
-                </div>
-              </label>
-              <label className="cursor-pointer group">
-                <input className="peer sr-only" name="age" type="radio" value="46+" />
-                <div className="p-6 bg-surface border-2 border-primary-container rounded-lg text-center transition-all duration-300 ease-out group-hover:border-[#C97A8F] peer-checked:border-[#C97A8F] peer-checked:bg-surface-bright hover-lift flex flex-col items-center gap-2">
-                  <span className="font-body-lg text-body-lg text-on-surface peer-checked:text-wine-accent font-medium">46+</span>
-                  <span className="font-label-sm text-label-sm text-outline uppercase">Anos</span>
-                </div>
-              </label>
+            <div className="flex flex-col gap-4 mb-stack-lg">
+              {currentQuestion.options.map((option) => {
+                const isSelected = currentAnswer === option.id;
+                return (
+                  <label key={option.id} className="cursor-pointer group block">
+                    <input
+                      className="peer sr-only"
+                      name={currentQuestion.id}
+                      type="radio"
+                      value={option.id}
+                      checked={isSelected}
+                      onChange={() => handleSelectOption(option.id)}
+                    />
+                    <div
+                      className={`p-4 md:p-6 bg-surface border-2 rounded-lg text-left transition-all duration-300 ease-out shadow-sm flex items-center gap-4 relative hover-lift
+                        ${
+                          isSelected
+                            ? "border-[#C97A8F] bg-surface-bright shadow-bloom"
+                            : "border-primary-container group-hover:border-[#C97A8F]"
+                        }
+                      `}
+                    >
+                      <div
+                        className={`w-6 h-6 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-colors duration-300
+                          ${
+                            isSelected
+                              ? "border-[#C97A8F] bg-[#C97A8F]"
+                              : "border-outline"
+                          }
+                        `}
+                      >
+                        {isSelected && (
+                          <div className="w-2 h-2 rounded-full bg-white"></div>
+                        )}
+                      </div>
+                      <span
+                        className={`font-body-md md:font-body-lg text-body-md md:text-body-lg transition-colors duration-300
+                          ${
+                            isSelected
+                              ? "text-wine-accent font-medium"
+                              : "text-on-surface"
+                          }
+                        `}
+                      >
+                        {option.text}
+                      </span>
+                    </div>
+                  </label>
+                );
+              })}
             </div>
             {/* Action Button */}
-            <div className="flex justify-center mt-stack-lg pt-stack-md border-t border-surface-variant">
+            <div className="flex justify-between mt-auto pt-stack-md border-t border-surface-variant">
               <button
-                onClick={() => setStep("result")}
-                className="bg-[#C97A8F] text-on-tertiary font-label-bold text-label-bold py-4 px-12 rounded-lg hover:bg-opacity-90 transition-all duration-300 hover-lift flex items-center gap-2 cursor-pointer"
+                onClick={() => {
+                  if (currentQuestionIndex > 0) {
+                    setCurrentQuestionIndex(currentQuestionIndex - 1);
+                  }
+                }}
+                disabled={currentQuestionIndex === 0}
+                className={`font-label-bold text-label-bold py-3 px-6 rounded-lg transition-all duration-300 flex items-center gap-2 cursor-pointer
+                  ${
+                    currentQuestionIndex === 0
+                      ? "opacity-50 cursor-not-allowed text-outline"
+                      : "text-[#8B4457] hover:bg-pastel-hover"
+                  }
+                `}
               >
-                Ver Resultado
-                <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>arrow_forward</span>
+                Voltar
+              </button>
+              <button
+                onClick={handleNext}
+                disabled={!currentAnswer}
+                className={`bg-[#C97A8F] text-white font-label-bold text-label-bold py-3 px-8 rounded-lg transition-all duration-300 flex items-center gap-2
+                  ${
+                    !currentAnswer
+                      ? "opacity-50 cursor-not-allowed"
+                      : "hover:bg-opacity-90 hover-lift shadow-sm cursor-pointer"
+                  }
+                `}
+              >
+                {isLastQuestion ? "Ver Resultado" : "Próxima"}
+                <svg
+                  className={`w-5 h-5 transition-transform duration-300 ${
+                    currentAnswer ? "group-hover:translate-x-1" : ""
+                  }`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2.5}
+                    d="M14 5l7 7m0 0l-7 7m7-7H3"
+                  />
+                </svg>
               </button>
             </div>
           </div>

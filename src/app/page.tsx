@@ -68,9 +68,22 @@ export default function Home() {
           <p className="font-title-sm text-title-sm text-secondary mb-stack-lg font-semibold bg-primary-container/50 inline-block px-6 py-3 rounded-full">
             Há quanto tempo sua pele não recebe exatamente o que ela precisa?
           </p>
-          <button className="bg-secondary text-white px-10 py-4 rounded-lg font-label-bold text-label-bold hover:bg-on-secondary-fixed-variant transition-colors hover-lift flex items-center gap-2 cursor-pointer">
+          <button className="group bg-secondary text-white px-10 py-4 rounded-lg font-label-bold text-label-bold hover:bg-on-secondary-fixed-variant transition-colors hover-lift flex items-center gap-2 cursor-pointer">
             Começar Meu Diagnóstico
-            <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
+            <svg
+              className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2.5}
+                d="M14 5l7 7m0 0l-7 7m7-7H3"
+              />
+            </svg>
           </button>
         </div>
       </section>

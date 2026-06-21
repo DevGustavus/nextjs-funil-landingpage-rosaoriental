@@ -3,6 +3,7 @@ import { Noto_Serif, Work_Sans } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import OfferTimer from "@/components/OfferTimer";
 
 const notoSerif = Noto_Serif({
   variable: "--font-noto-serif",
@@ -21,6 +22,8 @@ export const metadata: Metadata = {
   description: "Descubra como o Rosa Oriental transforma peles maduras.",
 };
 
+import { QuizProvider } from "@/context/QuizContext";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -32,11 +35,14 @@ export default function RootLayout({
       className={`${notoSerif.variable} ${workSans.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-surface text-on-surface">
-        <Navbar />
-        <main className="flex-1">
-          {children}
-        </main>
-        <Footer />
+        <QuizProvider>
+          <Navbar />
+          <main className="flex-1">
+            {children}
+          </main>
+          <Footer />
+          <OfferTimer />
+        </QuizProvider>
       </body>
     </html>
   );
