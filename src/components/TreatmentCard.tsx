@@ -25,6 +25,16 @@ export default function TreatmentCard({ treatment }: TreatmentCardProps) {
           : "border border-surface-variant"
         }`}
     >
+      {treatment.isPromo && (
+        <div className="absolute -top-3 -right-3 bg-[#E53E3E] text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg transform rotate-12 z-20 animate-pulse">
+          🔥 PROMO
+        </div>
+      )}
+      {treatment.hasBonus && (
+        <div className="absolute -top-3 -left-3 bg-[#C97A8F] text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg transform -rotate-12 z-20">
+          🎁 BRINDE
+        </div>
+      )}
       {treatment.tag && (
         <div
           className={`absolute -top-4 left-1/2 transform -translate-x-1/2 ${isHighlighted ? "bg-[#C97A8F]" : "bg-secondary"

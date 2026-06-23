@@ -15,4 +15,15 @@ export type Treatment = {
   isTurbo?: boolean;
   items: string[];
   link: string;
+  commission?: number;
+  hasBonus?: boolean;
+  isPromo?: boolean;
 };
+
+export type TreatmentGroup = {
+  id: string;
+  title: string;
+  description: string;
+  treatments: Treatment[];
+};
+

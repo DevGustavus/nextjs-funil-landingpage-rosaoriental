@@ -1,11 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { useQuiz } from "@/context/QuizContext";
 import { quizQuestions } from "@/data/quizQuestions";
 import { treatments } from "@/data/treatments";
 import TreatmentCard from "@/components/TreatmentCard";
 
 export default function QuizPage() {
+  const [showAllTreatments, setShowAllTreatments] = useState(false);
   const {
     step,
     setStep,
@@ -111,7 +113,10 @@ export default function QuizPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-6">
             <button
-              onClick={resetQuiz}
+              onClick={() => {
+                resetQuiz();
+                setShowAllTreatments(false);
+              }}
               className="w-full sm:w-auto bg-transparent border-2 border-[#C97A8F] text-[#C97A8F] font-label-bold text-label-bold py-3 px-8 rounded-lg hover:bg-[#C97A8F] hover:text-white transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer"
             >
               <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -131,14 +136,17 @@ export default function QuizPage() {
         </div>
         {/* Offers Grid grouped by Category */}
         <div className="w-full space-y-16">
-          {orderedCategories.map((category) => {
+          {orderedCategories.map((category, index) => {
             const categoryTreatments = treatments.filter(
               (t) => t.budgetCategory === category.value
             );
             if (categoryTreatments.length === 0) return null;
 
+            const isExtra = index >= 2;
+            if (isExtra && !showAllTreatments) return null;
+
             return (
-              <div key={category.value} className="w-full">
+              <div key={category.value} className={`w-full ${isExtra ? "animate-fade-in" : ""}`}>
                 <h2 className="text-2xl md:text-3xl font-serif text-wine-accent mb-6 border-b-2 border-primary-container pb-3 text-left font-semibold flex items-center gap-3">
                   {category.title}
                   {category.value === "Promoção" && (
@@ -156,6 +164,20 @@ export default function QuizPage() {
             );
           })}
         </div>
+
+        {!showAllTreatments && (
+          <div className="mt-12 text-center w-full">
+            <button
+              onClick={() => setShowAllTreatments(true)}
+              className="bg-transparent border-2 border-[#C97A8F] text-[#C97A8F] font-label-bold text-label-bold py-4 px-10 rounded-lg hover:bg-[#C97A8F] hover:text-white transition-all duration-300 flex items-center justify-center gap-2 mx-auto cursor-pointer shadow-bloom hover:scale-[1.02]"
+            >
+              Mostrar todos os tratamentos
+              <svg className="w-5 h-5 flex-shrink-0 animate-bounce" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+              </svg>
+            </button>
+          </div>
+        )}
         {/* Secondary CTA */}
         <div className="mt-16 text-center">
           <p className="font-body-md text-body-md text-on-surface-variant mb-4">

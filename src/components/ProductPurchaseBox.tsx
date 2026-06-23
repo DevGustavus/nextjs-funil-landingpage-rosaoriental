@@ -35,13 +35,20 @@ export default function ProductPurchaseBox({ product }: { product: Product }) {
                     : "bg-surface-container-lowest text-on-surface-variant border-surface-variant hover:border-[#C97A8F]"
                 }`}
               >
-                {treatment.name.replace("Rosa Oriental - ", "").replace("Rosa Oriental Turbo - ", "Turbo ")}
+                {(treatment.isTurbo ? "Turbo " : "") + (treatment.name.includes(" - ") ? treatment.name.split(" - ")[1] : treatment.name)}
               </button>
             ))}
           </div>
-          {currentTreatment?.bonus && (
-             <p className="text-sm text-[#C97A8F] mt-3 font-medium flex items-center gap-1 border border-primary-container bg-surface-container-low px-3 py-2 rounded-lg inline-flex">
-               <span>✨</span> Bônus: {currentTreatment.bonus}
+          {currentTreatment?.isPromo && (
+             <div className="mt-3 flex items-center">
+               <span className="bg-[#E53E3E] text-white text-xs font-bold px-3 py-1 rounded-full shadow-md animate-pulse">
+                 🔥 OFERTA ESPECIAL
+               </span>
+             </div>
+          )}
+          {currentTreatment?.hasBonus && currentTreatment?.bonus && (
+             <p className="text-sm text-[#C97A8F] mt-3 font-medium flex items-center gap-1 border border-[#C97A8F] bg-surface-container-low px-3 py-2 rounded-lg inline-flex shadow-sm">
+               <span>🎁</span> Brinde Incluso: {currentTreatment.bonus}
              </p>
           )}
         </div>

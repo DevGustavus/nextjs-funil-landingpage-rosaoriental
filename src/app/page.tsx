@@ -1,3 +1,5 @@
+import { SocialProofCard } from "@/components/SocialProofCard";
+
 export default function Home() {
   return (
     <>
@@ -104,8 +106,29 @@ export default function Home() {
               allowFullScreen
             ></iframe>
           </div>
-          <div className="mt-stack-md flex justify-center gap-2 text-secondary">
-            ⭐⭐⭐⭐⭐
+          {/* Comment Cards */}
+          <div className="mt-stack-lg w-full grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+            <SocialProofCard
+              name="Mariana A."
+              avatarUrl="https://i.pravatar.cc/150?img=5"
+              text="Estou gostando muito do Rosa Oriental. Minha pele está com aparência mais viçosa, hidratada e mais bonita no dia a dia. Além disso, achei super prático de usar e o atendimento foi excelente!"
+              date="12 Mai"
+              platform="facebook"
+            />
+            <SocialProofCard
+              name="Beatriz S."
+              avatarUrl="https://i.pravatar.cc/150?img=1"
+              text="Nunca imaginei que um produto pudesse mudar tanto minha pele em apenas 30 dias. As manchas claras diminuíram bastante e sinto meu rosto muito mais firme. Recomendo de olhos fechados."
+              date="04 Jun"
+              platform="instagram"
+            />
+            <SocialProofCard
+              name="Helena M."
+              avatarUrl="https://i.pravatar.cc/150?img=9"
+              text="Comprei com um pouco de receio, mas foi a melhor escolha que fiz. Meu bigode chinês deu uma suavizada incrível. As amigas já estão perguntando o que eu fiz no rosto!"
+              date="21 Ago"
+              platform="facebook"
+            />
           </div>
         </div>
       </section>
